@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>jiooooooo</title>
+    <style>
+        /* 포인트 컬러: 파스텔 블루 */
+        :root {
+            --point-color: #b0d4ff;
+            --text-color: #333;
+            --bg-color: #ffffff;
+            --gray-color: #f8f9fa;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Pretendard', -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        /* 헤더 */
+        header {
+            padding: 60px 20px;
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--point-color);
+        }
+
+        /* 메인 컨텐츠 영역 */
+        main {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 20px;
+            padding-bottom: 100px;
+        }
+
+        .post {
+            margin-bottom: 60px;
+            animation: fadeIn 0.8s ease-in-out;
+        }
+
+        .post img {
+            width: 100%;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .post p {
+            font-size: 1rem;
+            color: #555;
+            white-space: pre-wrap;
+        }
+
+        /* 하단 정보 (Instagram) */
+        footer {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            font-size: 0.8rem;
+            color: #aaa;
+        }
+
+        footer a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        /* 관리자 버튼 및 폼 */
+        #admin-btn {
+            position: fixed;
+            left: 20px;
+            bottom: 20px;
+            background: none;
+            border: none;
+            color: #eee;
+            cursor: pointer;
+            font-size: 0.7rem;
+        }
+
+        #admin-panel {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border: 1px solid var(--point-color);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            z-index: 100;
+            width: 90%;
+            max-width: 400px;
+            border-radius: 15px;
+        }
+
+        #admin-panel input, #admin-panel textarea {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            outline-color: var(--point-color);
+        }
+
+        .btn-group { text-align: right; }
+        .btn-group button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn-save { background: var(--point-color); color: white; }
+        .btn-close { background: #eee; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <header>jiooooooo</header>
+
+    <main id="post-container">
+        <!-- 글이 추가되는 곳 -->
+    </main>
+
+    <footer>
+        <a href="https://instagram.com/jihooooooo" target="_blank">instagram @jihooooooo</a>
+    </footer>
+
+    <!-- 관리자용 숨겨진 버튼 -->
+    <button id="admin-btn" onclick="checkAdmin()">Admin</button>
+
+    <!-- 글쓰기 창 -->
+    <div id="admin-panel">
+        <h3 style="margin-bottom:15px; color: var(--point-color);">New Post</h3>
+        <input type="text" id="img-url" placeholder="이미지 주소 (URL)">
+        <textarea id="post-text" rows="5" placeholder="내용을 입력하세요..."></textarea>
+        <div class="btn-group">
+            <button class="btn-close" onclick="closeAdmin()">닫기</button>
+            <button class="btn-save" onclick="savePost()">올리기</button>
+        </div>
+    </div>
+
+    <script>
+        const postContainer = document.getElementById('post-container');
+        const adminPanel = document.getElementById('admin-panel');
+
+        // 1. 게시물 불러오기
+        let posts = JSON.parse(localStorage.getItem('myPosts')) || [];
+
+        function renderPosts() {
+            postContainer.innerHTML = '';
+            posts.forEach((post, index) => {
+                const postHtml = `
+                    <div class="post">
+                        ${post.img ? `<img src="${post.img}" alt="photo">` : ''}
+                        <p>${post.text}</p>
+                        ${isAdmin ? `<button onclick="deletePost(${index})" style="color:red; border:none; background:none; font-size:10px; cursor:pointer;">삭제</button>` : ''}
+                    </div>
+                `;
+                postContainer.insertAdjacentHTML('afterbegin', postHtml);
+            });
+        }
+
+        // 2. 관리자 인증 (임시 비밀번호: 1234)
+        let isAdmin = false;
+        function checkAdmin() {
+            const pw = prompt("비밀번호를 입력하세요.");
+            if(pw === "1234") {
+                isAdmin = true;
+                adminPanel.style.display = 'block';
+            } else {
+                alert("권한이 없습니다.");
+            }
+        }
+
+        function closeAdmin() {
+            adminPanel.style.display = 'none';
+        }
+
+        // 3. 게시물 저장
+        function savePost() {
+            const imgUrl = document.getElementById('img-url').value;
+            const postText = document.getElementById('post-text').value;
+
+            if(!postText) {
+                alert("내용을 입력해 주세요.");
+                return;
+            }
+
+            const newPost = { img: imgUrl, text: postText };
+            posts.push(newPost);
+            localStorage.setItem('myPosts', JSON.stringify(posts));
+            
+            document.getElementById('img-url').value = '';
+            document.getElementById('post-text').value = '';
+            
+            renderPosts();
+            closeAdmin();
+        }
+
+        // 4. 게시물 삭제
+        function deletePost(index) {
+            if(confirm("정말 삭제하시겠습니까?")) {
+                posts.splice(index, 1);
+                localStorage.setItem('myPosts', JSON.stringify(posts));
+                renderPosts();
+            }
+        }
+
+        renderPosts();
+    </script>
+</body>
+</html>
